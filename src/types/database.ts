@@ -274,6 +274,128 @@ export interface Database {
           updated_at?: string;
         };
       };
+      reviews: {
+        Row: {
+          id: string;
+          user_id: string;
+          product_id: string;
+          rating: number;
+          title: string | null;
+          body: string | null;
+          helpful_votes: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          product_id: string;
+          rating: number;
+          title?: string | null;
+          body?: string | null;
+          helpful_votes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          product_id?: string;
+          rating?: number;
+          title?: string | null;
+          body?: string | null;
+          helpful_votes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      coupons: {
+        Row: {
+          id: string;
+          code: string;
+          description: string | null;
+          discount_type: 'percentage' | 'fixed';
+          discount_value: number;
+          minimum_order_value: number;
+          max_uses: number | null;
+          used_count: number;
+          expires_at: string | null;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          description?: string | null;
+          discount_type: 'percentage' | 'fixed';
+          discount_value: number;
+          minimum_order_value?: number;
+          max_uses?: number | null;
+          used_count?: number;
+          expires_at?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          description?: string | null;
+          discount_type?: 'percentage' | 'fixed';
+          discount_value?: number;
+          minimum_order_value?: number;
+          max_uses?: number | null;
+          used_count?: number;
+          expires_at?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+      };
+      coupon_usages: {
+        Row: {
+          id: string;
+          coupon_id: string;
+          user_id: string;
+          order_id: string | null;
+          used_at: string;
+        };
+        Insert: {
+          id?: string;
+          coupon_id: string;
+          user_id: string;
+          order_id?: string | null;
+          used_at?: string;
+        };
+        Update: {
+          id?: string;
+          coupon_id?: string;
+          user_id?: string;
+          order_id?: string | null;
+          used_at?: string;
+        };
+      };
+      stock_notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          product_id: string;
+          notified: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          product_id: string;
+          notified?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          product_id?: string;
+          notified?: boolean;
+          created_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: {

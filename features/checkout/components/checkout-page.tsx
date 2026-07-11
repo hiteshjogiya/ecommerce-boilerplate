@@ -14,6 +14,7 @@ import { SHIPPING_METHODS } from "@/features/checkout/constants";
 import { addressSchema, checkoutSchema, type AddressFormValues } from "@/features/checkout/schemas/checkout-schema";
 import type { AddressRow } from "@/src/services/address.service";
 import { formatCurrency } from "@/src/constants/order";
+import { CouponInput } from "@/features/checkout/components/coupon-input";
 
 function AddressCard({
   address,
@@ -106,6 +107,7 @@ export function CheckoutPage() {
   const [editingAddress, setEditingAddress] = useState<AddressRow | null>(null);
   const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
 
   const addressForm = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
@@ -456,14 +458,21 @@ export function CheckoutPage() {
               <span>Tax (placeholder)</span>
               <span className="font-medium text-slate-900">{formatCurrency(tax)}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span>Discount (placeholder)</span>
-              <span className="font-medium text-slate-900">{formatCurrency(discount)}</span>
-            </div>
+            {couponDiscount > 0 && (
+              <div className="flex items-center justify-between text-green-700">
+                <span>Coupon discount</span>
+                <span className="font-medium">-{formatCurrency(couponDiscount)}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-base">
               <span className="font-semibold text-slate-900">Grand total</span>
-              <span className="font-semibold text-slate-900">{formatCurrency(grandTotal)}</span>
+              <span className="font-semibold text-slate-900">{formatCurrency(Math.max(0, grandTotal - couponDiscount))}</span>
             </div>
+          </div>
+
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <p className="text-sm font-medium text-slate-700 mb-2">Have a coupon?</p>
+            <CouponInput orderTotal={cartTotals.subtotal} onDiscountChange={(d) => setCouponDiscount(d)} />
           </div>
 
           {checkoutError || placeOrderApi.error ? (

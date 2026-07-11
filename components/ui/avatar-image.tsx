@@ -16,6 +16,7 @@ export function AvatarImage({ src, alt, size, className = "", fallbackLabel }: A
   const [hasError, setHasError] = useState(false);
 
   const showImage = Boolean(src && !hasError);
+  const useUnoptimizedImage = typeof src === "string" && src.includes("/storage/v1/object/public/avatars/");
 
   return (
     <div className={`relative overflow-hidden rounded-full border border-slate-200 bg-slate-100 ${className}`}>
@@ -27,6 +28,7 @@ export function AvatarImage({ src, alt, size, className = "", fallbackLabel }: A
           fill
           sizes={`${size}px`}
           className="object-cover"
+          unoptimized={useUnoptimizedImage}
           onError={() => setHasError(true)}
         />
       ) : fallbackLabel ? (

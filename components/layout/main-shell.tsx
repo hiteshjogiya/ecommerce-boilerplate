@@ -1,8 +1,11 @@
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { CartDrawer } from "@/features/cart/components/cart-drawer";
-import { CartSyncBridge } from "@/features/cart/hooks/use-cart-sync";
-import { WishlistSyncBoundary } from "@/features/wishlist/components/wishlist-sync-boundary";
+import dynamic from "next/dynamic";
+
+const CartDrawer = dynamic(() => import("@/features/cart/components/cart-drawer").then((mod) => mod.CartDrawer));
+const CartSyncBridge = dynamic(() => import("@/features/cart/hooks/use-cart-sync").then((mod) => mod.CartSyncBridge));
+const WishlistSyncBoundary = dynamic(() => import("@/features/wishlist/components/wishlist-sync-boundary").then((mod) => mod.WishlistSyncBoundary));
+const CompareBar = dynamic(() => import("@/features/products/components/compare-button").then((mod) => mod.CompareBar));
 
 export function MainShell({ children }: { children: React.ReactNode }) {
   return (
@@ -11,8 +14,11 @@ export function MainShell({ children }: { children: React.ReactNode }) {
       <CartSyncBridge />
       <WishlistSyncBoundary />
       <CartDrawer />
-      <div className="flex-1">{children}</div>
+      <main id="main-content" className="flex-1" tabIndex={-1}>
+        {children}
+      </main>
       <Footer />
+      <CompareBar />
     </div>
   );
 }

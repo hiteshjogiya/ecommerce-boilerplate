@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Northstar maskable icon">
+  <rect width="512" height="512" fill="#0f172a" />
+  <circle cx="256" cy="256" r="170" fill="#1e293b" />
+  <path d="M256 126l30 84 88 5-69 55 23 86-72-47-72 47 23-86-69-55 88-5z" fill="#f8fafc" />
+</svg>

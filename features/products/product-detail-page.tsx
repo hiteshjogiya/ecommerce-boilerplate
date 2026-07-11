@@ -1,16 +1,26 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { ChevronRight, Info, Package, Truck } from "lucide-react";
 import { EmptyState } from "@/features/home/components/empty-state";
 import { ProductCard } from "@/components/common/product-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getSupabaseEnv } from "@/src/lib/supabase/env";
 import { getProductBySlug, getProductsByCategory } from "@/src/services/product.service";
+import { getProductRatingSummaries } from "@/src/services/review.service";
 import { fallbackCategories, findFallbackProductBySlug, getFallbackCategoryBySlug, getFallbackProductsByCategoryId } from "@/src/constants/catalog-fallback";
 import { buildProductGalleryImages, formatCurrency, getDiscountPercentage, getProductCategoryName, getProductCategorySlug, isValidProductSlug, type ProductDetailRecord } from "@/src/lib/product-detail";
 import { ProductImageGallery } from "@/features/products/components/product-image-gallery";
 import { AddToCartSection } from "@/features/products/components/add-to-cart-section";
-import { RecentlyViewedProducts } from "@/features/products/components/recently-viewed";
 import { ProductBreadcrumbs } from "@/features/products/components/product-breadcrumbs";
+import { ProductShareButton } from "@/features/products/components/product-share-button";
+import { StockNotificationButton } from "@/features/products/components/stock-notification-button";
+import { CompareButton } from "@/features/products/components/compare-button";
+import { absoluteUrl, buildBreadcrumbJsonLd, buildProductJsonLd } from "@/src/lib/seo";
+
+const RecentlyViewedProducts = dynamic(() => import("@/features/products/components/recently-viewed").then((mod) => mod.RecentlyViewedProducts));
+const RecommendationsSection = dynamic(() => import("@/features/products/components/recommendations-section").then((mod) => mod.RecommendationsSection));
+const ReviewSection = dynamic(() => import("@/features/products/components/review-section").then((mod) => mod.ReviewSection));
 
 interface ProductDetailPageProps {
   slug: string;
@@ -88,9 +98,29 @@ async function ProductDetailSection({ product, relatedProducts }: ProductDetailS
   const stockLabel = getStockLabel(Number(product.stock));
   const fullDescription = product.full_description ?? product.description;
   const sku = product.sku ?? null;
+  const relatedRatingSummaries = await getProductRatingSummaries(relatedProducts.map((item) => item.id));
+  const productUrl = absoluteUrl(`/products/${product.slug}`);
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Home", url: absoluteUrl("/") },
+    { name: "Products", url: absoluteUrl("/products") },
+    { name: categoryName, url: categorySlug ? absoluteUrl(`/categories/${categorySlug}`) : absoluteUrl("/products") },
+    { name: product.title, url: productUrl },
+  ]);
+  const productJsonLd = buildProductJsonLd({
+    name: product.title,
+    description: product.description,
+    image: product.thumbnail ?? "/window.svg",
+    sku,
+    price: Number(product.price),
+    availability: Number(product.stock) > 0 ? "InStock" : "OutOfStock",
+    url: productUrl,
+    category: categoryName,
+  });
 
   return (
     <article className="space-y-10">
+      <JsonLd id={`breadcrumb-product-${product.id}`} data={breadcrumbJsonLd} />
+      <JsonLd id={`product-jsonld-${product.id}`} data={productJsonLd} />
       <ProductBreadcrumbs categoryName={categoryName} categorySlug={categorySlug} productName={product.title} />
 
       <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
@@ -134,6 +164,15 @@ async function ProductDetailSection({ product, relatedProducts }: ProductDetailS
 
           <AddToCartSection product={product} />
 
+          {product.stock === 0 && (
+            <StockNotificationButton productId={product.id} />
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <ProductShareButton title={product.title} slug={product.slug} />
+            <CompareButton product={product} />
+          </div>
+
           <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
               <Info className="h-4 w-4 text-blue-600" />
@@ -175,7 +214,8 @@ async function ProductDetailSection({ product, relatedProducts }: ProductDetailS
                   originalPrice: item.compare_price ? Number(item.compare_price) : undefined,
                   image: item.thumbnail ?? "/window.svg",
                   badge: item.featured ? "Featured" : undefined,
-                  reviews: 4,
+                  rating: relatedRatingSummaries[item.id]?.average ?? 0,
+                  reviews: relatedRatingSummaries[item.id]?.count ?? 0,
                   href: `/products/${item.slug}`,
                 }}
               />
@@ -187,6 +227,10 @@ async function ProductDetailSection({ product, relatedProducts }: ProductDetailS
       )}
 
       <RecentlyViewedProducts currentProduct={product} />
+
+      <RecommendationsSection productId={product.id} categoryId={product.category_id} />
+
+      <ReviewSection productId={product.id} />
     </article>
   );
 }

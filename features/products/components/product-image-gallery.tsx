@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { getImageProps } from "@/src/lib/image";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -29,7 +30,16 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
           >
             {images.map((image, index) => (
               <div key={`${image}-${index}`} className="relative h-[420px] w-full flex-none snap-center">
-                <Image src={image} alt={`${title} image ${index + 1}`} fill sizes="100vw" className="object-cover" priority={index === 0} />
+                <Image
+                  src={image}
+                  alt={`${title} image ${index + 1}`}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                  priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  {...getImageProps(image)}
+                />
               </div>
             ))}
           </div>
@@ -44,6 +54,8 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
               sizes="(max-width: 1024px) 100vw, 55vw"
               className="object-cover transition duration-500 group-hover:scale-110"
               priority
+              loading="eager"
+              {...getImageProps(activeImage)}
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/15 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
             <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-2 text-xs font-medium text-slate-700 shadow-sm backdrop-blur">
@@ -64,7 +76,15 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
             aria-label={`View image ${index + 1}`}
             aria-pressed={activeIndex === index}
           >
-            <Image src={image} alt={`${title} thumbnail ${index + 1}`} fill sizes="80px" className="object-cover" />
+            <Image
+              src={image}
+              alt={`${title} thumbnail ${index + 1}`}
+              fill
+              sizes="80px"
+              className="object-cover"
+              loading="lazy"
+              {...getImageProps(image)}
+            />
           </button>
         ))}
       </div>

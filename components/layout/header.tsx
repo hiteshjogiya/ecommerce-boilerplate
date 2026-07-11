@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, ShoppingBag, Heart, User, X } from "lucide-react";
+import { Menu, Heart, ShoppingBag, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart-store";
 import { SiteNav } from "@/components/layout/site-nav";
-import { Input } from "@/components/ui/input";
+import { SearchBar } from "@/components/layout/search-bar";
 import { createClient } from "@/src/lib/supabase/client";
 import { AvatarImage } from "@/components/ui/avatar-image";
 
@@ -64,6 +64,8 @@ export function Header() {
             className="rounded-full border border-slate-200 p-2 lg:hidden"
             onClick={() => setMobileNavOpen((value) => !value)}
             aria-label="Toggle menu"
+            aria-expanded={mobileNavOpen}
+            aria-controls="mobile-site-nav"
           >
             {mobileNavOpen ? <X className="h-5 w-5 text-slate-700" /> : <Menu className="h-5 w-5 text-slate-700" />}
           </button>
@@ -75,14 +77,9 @@ export function Header() {
         <SiteNav />
 
         <div className="flex flex-1 items-center justify-end gap-3">
-          <label className="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-500 md:flex md:max-w-xs lg:flex-1 lg:max-w-md">
-            <Search className="h-4 w-4" />
-            <Input
-              aria-label="Search products"
-              placeholder="Search products"
-              className="h-8 border-none bg-transparent px-0 shadow-none focus:ring-0"
-            />
-          </label>
+          <div className="hidden md:flex flex-1 lg:flex-1 max-w-md">
+            <SearchBar />
+          </div>
           <Link href="/wishlist" className="relative rounded-full border border-slate-200 p-2.5 text-slate-700">
             <Heart className="h-5 w-5" />
             {wishlist.length > 0 ? (
@@ -109,7 +106,7 @@ export function Header() {
         </div>
       </div>
       {mobileNavOpen ? (
-        <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
+        <div id="mobile-site-nav" className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
           <SiteNav mobile />
         </div>
       ) : null}

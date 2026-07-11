@@ -1,4 +1,5 @@
-import { createServerSupabaseClient } from "@/src/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicSupabaseClient } from "@/src/lib/supabase/public";
 import type { Database } from "@/src/types/database";
 
 export type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
@@ -13,31 +14,47 @@ function isMissingSupabaseTableError(error: unknown) {
 }
 
 export async function getCategories() {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.from("categories").select("*").order("created_at", { ascending: false });
-
-  if (error) {
-    if (isMissingSupabaseTableError(error)) {
-      return [] as CategoryRow[];
-    }
-
-    throw error;
-  }
-
-  return data as CategoryRow[];
+  return getCategoriesCached();
 }
 
-export async function getCategoryBySlug(slug: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.from("categories").select("*").eq("slug", slug).maybeSingle();
+const getCategoriesCached = unstable_cache(
+  async () => {
+    const supabase = createPublicSupabaseClient();
+    const { data, error } = await supabase.from("categories").select("*").order("created_at", { ascending: false });
 
-  if (error) {
-    if (isMissingSupabaseTableError(error)) {
-      return null;
+    if (error) {
+      if (isMissingSupabaseTableError(error)) {
+        return [] as CategoryRow[];
+      }
+
+      throw error;
     }
 
-    throw error;
-  }
+    return data as CategoryRow[];
+  },
+  ["categories-list"],
+  { revalidate: 600, tags: ["categories"] },
+);
 
-  return data as CategoryRow | null;
+const getCategoryBySlugCached = unstable_cache(
+  async (slug: string) => {
+    const supabase = createPublicSupabaseClient();
+    const { data, error } = await supabase.from("categories").select("*").eq("slug", slug).maybeSingle();
+
+    if (error) {
+      if (isMissingSupabaseTableError(error)) {
+        return null;
+      }
+
+      throw error;
+    }
+
+    return data as CategoryRow | null;
+  },
+  ["category-by-slug"],
+  { revalidate: 600, tags: ["categories"] },
+);
+
+export async function getCategoryBySlug(slug: string) {
+  return getCategoryBySlugCached(slug);
 }
