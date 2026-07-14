@@ -12,6 +12,7 @@ export const metadata: Metadata = buildMetadata({
 export const revalidate = 300;
 
 export default function Home() {
+  console.log("Rendering Home page");
   return (
     <MainShell>
       <HomePage />
